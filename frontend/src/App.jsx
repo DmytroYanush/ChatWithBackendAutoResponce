@@ -1,14 +1,14 @@
+import { useState } from 'react';
 import ChatList from './components/ChatList';
 import ChatWindow from './components/ChatWindow';
-import { useState } from 'react';
 
 function App() {
-  const [selectedChatId, setSelectedChatId] = useState(null);
+  const [selectedChat, setSelectedChat] = useState(null);
 
   return (
     <div>
-      <ChatList onSelect={setSelectedChatId} />
-      {selectedChatId && <ChatWindow chatId={selectedChatId} />}
+      <ChatList onSelect={(chat) => setSelectedChat(chat)} />
+      {selectedChat && <ChatWindow chatId={selectedChat._id} />}
     </div>
   );
 }

@@ -8,6 +8,7 @@ function ChatList({ onSelect }) {
   const [editingId, setEditingId] = useState(null);
   const [editFirstName, setEditFirstName] = useState('');
   const [editLastName, setEditLastName] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     getChats().then(setChats);
@@ -32,6 +33,10 @@ function ChatList({ onSelect }) {
     setChats(prev => prev.filter(chat => chat._id !== id));
   };
 
+  const filteredChats = chats.filter(chat =>
+    `${chat.firstName} ${chat.lastName}`.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div>
       <input
@@ -46,8 +51,15 @@ function ChatList({ onSelect }) {
       />
       <button onClick={handleCreate}>Create Chat</button>
 
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search chat..."
+        style={{ marginTop: '10px', display: 'block' }}
+      />
+
       <ul>
-        {chats.map((chat) => (
+        {filteredChats.map((chat) => (
           <li key={chat._id}>
             {editingId === chat._id ? (
               <>
@@ -64,7 +76,7 @@ function ChatList({ onSelect }) {
               </>
             ) : (
               <>
-                <span onClick={() => onSelect(chat._id)}>
+                <span onClick={() => onSelect(chat)}>
                   {chat.firstName} {chat.lastName}
                 </span>
                 <button
