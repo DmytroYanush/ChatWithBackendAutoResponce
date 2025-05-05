@@ -76,7 +76,7 @@ function ChatList({ onSelect }) {
               </>
             ) : (
               <>
-                <span onClick={() => onSelect(chat)}>
+                <span onClick={() => onSelect(chat._id)}>
                   {chat.firstName} {chat.lastName}
                 </span>
                 <button

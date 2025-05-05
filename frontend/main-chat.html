@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 25%;
+      background: #f0f0f0;
+      padding: 1rem;
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+    }
+
+    .chat-item {
+      padding: 0.5rem;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+
+    .chat-item:hover {
+      background: #e0e0e0;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+
+    .chat-header {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: #fff;
+    }
+
+    .message {
+      margin: 0.5rem 0;
+    }
+
+    .message.user {
+      text-align: right;
+    }
+
+    .message.bot {
+      text-align: left;
+      color: #555;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .input-area button {
+      padding: 0.5rem 1rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .input-area button:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="chat-item">Dmytro Yanush</div>
+    <div class="chat-item">Alan Turing</div>
+    <div class="chat-item">Ada Lovelace</div>
+  </div>
+
+  <div class="main">
+    <div class="chat-header">Selected Chat: Dmytro Yanush</div>
+    <div class="messages">
+      <div class="message user">Hello</div>
+      <div class="message bot">Hi there! How can I help?</div>
+    </div>
+    <div class="input-area">
+      <input type="text" placeholder="Type your message..." />
+      <button>Send</button>
+    </div>
+  </div>
+
+</body>
+</html>
