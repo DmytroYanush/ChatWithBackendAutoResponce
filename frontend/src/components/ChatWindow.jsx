@@ -2,18 +2,20 @@ import { useEffect, useState } from 'react';
 import { getMessages, sendMessage } from '../api/messages';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../styles/chatwindow.css'; // Підключення стилів
+import '../styles/chatwindow.css';
 
-function ChatWindow({ chatId }) {
+function ChatWindow({ chatId, chatName }) {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState('');
 
     useEffect(() => {
         if (chatId) {
-            getMessages(chatId).then(setMessages).catch(err => {
-                toast.error('Failed to fetch messages');
-                console.error(err);
-            });
+            getMessages(chatId)
+                .then(setMessages)
+                .catch((err) => {
+                    toast.error('Failed to fetch messages');
+                    console.error(err);
+                });
         }
     }, [chatId]);
 
@@ -28,6 +30,7 @@ function ChatWindow({ chatId }) {
             setText('');
             getMessages(chatId).then(setMessages);
 
+            // Auto-response wait
             setTimeout(() => {
                 getMessages(chatId).then(setMessages);
             }, 3500);
@@ -39,14 +42,29 @@ function ChatWindow({ chatId }) {
 
     return (
         <div className="chat-container">
+            
             <div className="chat-messages">
-                {messages.map((msg, i) => (
-                    <div key={i} className={`chat-message ${msg.sender}`}>
-                        <div className="message-sender">{msg.sender}:</div>
-                        <div className="message-text">{msg.text}</div>
+                {messages.map((message, i) => (
+                    <div
+                        key={i}
+                        className={`chat-message-wrapper ${message.sender === 'bot' ? 'bot' : 'user'}`}
+                    >
+                        <div className={`chat-message ${message.sender}`}>
+                            <div className="message-text">{message.text}</div>
+                        </div>
+                        <div className={`message-time ${message.sender}`}>
+                            {new Date(message.createdAt).toLocaleString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            })}
+                        </div>
                     </div>
                 ))}
             </div>
+
             <form onSubmit={handleSubmit} className="chat-input-area">
                 <input
                     value={text}
@@ -55,6 +73,7 @@ function ChatWindow({ chatId }) {
                 />
                 <button type="submit">Send</button>
             </form>
+
             <ToastContainer />
         </div>
     );

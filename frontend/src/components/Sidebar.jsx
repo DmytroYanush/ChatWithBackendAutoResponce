@@ -1,35 +1,83 @@
 import { useState, useEffect } from 'react';
 import { getChats, createChat, updateChat, deleteChat } from '../api/chats';
-import './Sidebar.css'; 
+import { getMessages } from '../api/messages';
+import { auth, provider } from '../firebase';
+import { signInWithPopup, signOut } from 'firebase/auth';
+
+import './Sidebar.css';
 
 function Sidebar({ onSelect }) {
   const [chats, setChats] = useState([]);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editFirstName, setEditFirstName] = useState('');
   const [editLastName, setEditLastName] = useState('');
   const [search, setSearch] = useState('');
+  const [user, setUser] = useState(null);
+  const [lastDates, setLastDates] = useState({});
 
   useEffect(() => {
-    getChats().then(setChats);
+    const fetchChatsWithLastDates = async () => {
+      const chatList = await getChats();
+      setChats(chatList);
+
+      const dateMap = {};
+      for (const chat of chatList) {
+        const messages = await getMessages(chat._id);
+        if (messages.length > 0) {
+          const last = messages[messages.length - 1];
+          dateMap[chat._id] = new Date(last.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        }
+      }
+      setLastDates(dateMap);
+    };
+
+    fetchChatsWithLastDates();
   }, []);
 
-  const handleCreate = async () => {
-    if (!firstName || !lastName) return;
-    await createChat(firstName, lastName);
-    setChats(await getChats());
-    setFirstName('');
-    setLastName('');
+  const handleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
+  const handleCreateChatFromSearch = async () => {
+    if (!user) return alert('You must be logged in to create a chat.');
+    if (!search.trim()) return;
+    const [first, ...rest] = search.trim().split(' ');
+    const last = rest.join(' ') || ' ';
+    await createChat(first, last);
+    const updatedChats = await getChats();
+    setChats(updatedChats);
+    const created = updatedChats.find(c => c.firstName === first && c.lastName === last);
+    if (created) onSelect(created);
+    setSearch('');
   };
 
   const handleUpdate = async (id) => {
+    if (!user) return;
     await updateChat(id, editFirstName, editLastName);
     setEditingId(null);
     setChats(await getChats());
   };
 
   const handleDelete = async (id) => {
+    if (!user) return;
     await deleteChat(id);
     setChats(prev => prev.filter(chat => chat._id !== id));
   };
@@ -38,69 +86,92 @@ function Sidebar({ onSelect }) {
     `${chat.firstName} ${chat.lastName}`.toLowerCase().includes(search.toLowerCase())
   );
 
+  const chatExists = filteredChats.length > 0;
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !chatExists) {
+      handleCreateChatFromSearch();
+    }
+  };
+
   return (
     <div className="sidebar">
-      <div className="sidebar-header">
-        <input
-          className="search-input"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search or start new chat"
-        />
-        {/* Можна додати логін-кнопку */}
-        <button className="login-button">Log in</button>
+      <div className="sidebar-top">
+        <div className="sidebar-login">
+          {user ? (
+            <>
+              <img src={user.photoURL} alt=" " />
+              <button onClick={handleLogout}>Log out</button>
+            </>
+          ) : (
+            <button onClick={handleLogin}>Log in</button>
+          )}
+        </div>
+        <div className="search-container">
+          <input
+            className="search-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Search or start new chat"
+          />
+          {!chatExists && search.trim() && user && (
+            <button className="create-inline" onClick={handleCreateChatFromSearch}>Create</button>
+          )}
+        </div>
       </div>
 
-      <div className="new-chat">
-        <input
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          placeholder="First Name"
-        />
-        <input
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          placeholder="Last Name"
-        />
-        <button onClick={handleCreate}>Create</button>
-      </div>
+      <h4 className="sidebar-title">Chats</h4>
 
-      <ul className="chat-list">
-        {filteredChats.map((chat) => (
-          <li key={chat._id} className="chat-item">
-            {editingId === chat._id ? (
-              <div className="edit-mode">
-                <input
-                  value={editFirstName}
-                  onChange={(e) => setEditFirstName(e.target.value)}
-                />
-                <input
-                  value={editLastName}
-                  onChange={(e) => setEditLastName(e.target.value)}
-                />
-                <button onClick={() => handleUpdate(chat._id)}>💾</button>
-                <button onClick={() => setEditingId(null)}>❌</button>
-              </div>
-            ) : (
-              <div className="chat-info">
-                <span className="chat-name" onClick={() => onSelect(chat)}>
-                  {chat.firstName} {chat.lastName}
-                </span>
-                <div className="chat-actions">
-                  <button
-                    onClick={() => {
-                      setEditingId(chat._id);
-                      setEditFirstName(chat.firstName);
-                      setEditLastName(chat.lastName);
-                    }}
-                  >✏️</button>
-                  <button onClick={() => handleDelete(chat._id)}>🗑️</button>
+      {!user ? (
+        <p style={{ padding: '10px', color: 'gray' }}>Log in to view and manage chats.</p>
+      ) : (
+        <ul className="chat-list">
+          {filteredChats.map((chat) => (
+            <li key={chat._id} className="chat-item">
+              {editingId === chat._id ? (
+                <div className="edit-mode">
+                  <label>
+                    <span className="edit-label">First Name</span>
+                    <input
+                      value={editFirstName}
+                      onChange={(e) => setEditFirstName(e.target.value)}
+                    />
+                  </label>
+                  <label>
+                    <span className="edit-label">Last Name</span>
+                    <input
+                      value={editLastName}
+                      onChange={(e) => setEditLastName(e.target.value)}
+                    />
+                  </label>
+                  <button onClick={() => handleUpdate(chat._id)}>💾</button>
+                  <button onClick={() => setEditingId(null)}>❌</button>
                 </div>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+              ) : (
+                <div className="chat-info">
+                  <div onClick={() => onSelect(chat)} className="chat-text">
+                    <span className="chat-name">{chat.firstName} {chat.lastName}</span>
+                    {lastDates[chat._id] && (
+                      <div className="chat-date">{lastDates[chat._id]}</div>
+                    )}
+                  </div>
+                  {user && (
+                    <div className="chat-actions">
+                      <button onClick={() => {
+                        setEditingId(chat._id);
+                        setEditFirstName(chat.firstName);
+                        setEditLastName(chat.lastName);
+                      }}>✏️</button>
+                      <button onClick={() => handleDelete(chat._id)}>🗑️</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
