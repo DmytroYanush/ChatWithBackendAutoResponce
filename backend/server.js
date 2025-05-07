@@ -20,28 +20,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(async () => {
-  await createInitialChats(); 
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-})
-.catch((err) => console.error('MongoDB connection error:', err));
-
-
-const Chat = require('./models/Chat');
-
-async function createInitialChats() {
-  const count = await Chat.countDocuments();
-  console.log('Chat count in DB:', count); // <--- додай це
-  if (count === 0) {
-    await Chat.insertMany([
-      { firstName: 'Ada', lastName: 'Lovelace' },
-      { firstName: 'Alan', lastName: 'Turing' },
-      { firstName: 'Grace', lastName: 'Hopper' },
-    ]);
-    console.log('✅ Predefined chats created');
-  } else {
-    console.log('⚠️ Chats already exist, skipping creation');
-  }
-}
-
-
+  .then(() => {
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  })
+  .catch((err) => console.error('❌ MongoDB connection error:', err));

@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import { getChats, createChat, updateChat, deleteChat } from '../api/chats';
 import { getMessages } from '../api/messages';
-import { auth, provider } from '../firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
-
+import { auth, provider } from '../firebase';
 import './Sidebar.css';
 
-function Sidebar({ onSelect }) {
+function Sidebar({ onSelect, user }) {
   const [chats, setChats] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editFirstName, setEditFirstName] = useState('');
   const [editLastName, setEditLastName] = useState('');
   const [search, setSearch] = useState('');
-  const [user, setUser] = useState(null);
   const [lastDates, setLastDates] = useState({});
+
 
   useEffect(() => {
     const fetchChatsWithLastDates = async () => {
@@ -40,8 +39,7 @@ function Sidebar({ onSelect }) {
 
   const handleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
+      await signInWithPopup(auth, provider);
     } catch (err) {
       console.error('Login failed:', err);
     }
@@ -50,11 +48,11 @@ function Sidebar({ onSelect }) {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setUser(null);
     } catch (err) {
       console.error('Logout failed:', err);
     }
   };
+
 
   const handleCreateChatFromSearch = async () => {
     if (!user) return alert('You must be logged in to create a chat.');
