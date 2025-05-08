@@ -42,3 +42,13 @@ mongoose.connect(process.env.MONGO_URI, {
 io.on('connection', (socket) => {
   console.log('Socket.IO client connected:', socket.id);
 });
+
+const path = require('path');
+
+// Serve static frontend
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+// Fallback to index.html for any unknown routes (SPA support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
