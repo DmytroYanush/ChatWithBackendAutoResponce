@@ -21,13 +21,6 @@ logs
 .env.test.local
 .env.production.local
 
-# Build output
-dist/
-build/
-frontend/build/
-frontend/dist/
-backend/build/
-backend/dist/
 
 # Coverage directory used by tools like istanbul
 coverage/
