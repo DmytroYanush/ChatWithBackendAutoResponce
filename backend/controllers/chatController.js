@@ -19,6 +19,10 @@ const updateChat = async (req, res) => {
   const { id } = req.params;
   const { firstName, lastName } = req.body;
   try {
+    const chat = await Chat.findById(id);
+    if (chat.isPredefined) {
+      return res.status(403).json({ error: 'Cannot modify predefined chat' });
+    }
     const updated = await Chat.findByIdAndUpdate(id, { firstName, lastName }, { new: true });
     res.json(updated);
   } catch (err) {
@@ -28,6 +32,12 @@ const updateChat = async (req, res) => {
 
 const deleteChat = async (req, res) => {
   const { id } = req.params;
+  const chat = await Chat.findById(id);
+  
+  if (chat.isPredefined) {
+    return res.status(403).json({ error: 'Cannot delete predefined chat' });
+  }
+  
   await Chat.findByIdAndDelete(id);
   res.json({ message: 'Chat deleted' });
 };

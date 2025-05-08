@@ -8,6 +8,10 @@ const chatSchema = new mongoose.Schema({
   lastName: {
     type: String,
     required: true
+  },
+  isPredefined: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 

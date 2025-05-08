@@ -154,7 +154,7 @@ function Sidebar({ onSelect, user }) {
                       <div className="chat-date">{lastDates[chat._id]}</div>
                     )}
                   </div>
-                  {user && (
+                  {user && !chat.isPredefined && (
                     <div className="chat-actions">
                       <button onClick={() => {
                         setEditingId(chat._id);
