@@ -3,6 +3,7 @@ import { getMessages, sendMessage } from '../api/messages';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/chatwindow.css';
+import AutoMessageButton from './AutoMessageButton';
 
 function ChatWindow({ chatId, chatName }) {
     const [messages, setMessages] = useState([]);
@@ -72,6 +73,7 @@ function ChatWindow({ chatId, chatName }) {
                     placeholder="Type your message..."
                 />
                 <button type="submit">Send</button>
+                <AutoMessageButton compact />
             </form>
 
             <ToastContainer />

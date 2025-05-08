@@ -33,6 +33,10 @@ const sendMessage = async (req, res) => {
     const userMsg = new Message({ chatId, sender: 'user', text });
     await userMsg.save();
 
+    // Emit new-message event for user message
+    const io = req.app.get('io');
+    io.emit('new-message', userMsg);
+
     res.status(201).json(userMsg);
 
     setTimeout(async () => {
@@ -40,6 +44,8 @@ const sendMessage = async (req, res) => {
         const quote = await getRandomQuote();
         const botMsg = new Message({ chatId, sender: 'bot', text: quote });
         await botMsg.save();
+        // Emit new-message event for bot message
+        io.emit('new-message', botMsg);
       } catch (botError) {
         console.error('Bot reply error:', botError.message);
       }

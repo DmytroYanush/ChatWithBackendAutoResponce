@@ -4,6 +4,10 @@ import ChatWindow from './components/ChatWindow';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 import './styles/chat.css';
+import socket from './socket';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import AutoMessageButton from './components/AutoMessageButton';
 
 function App() {
     const [selectedChat, setSelectedChat] = useState(null);
@@ -18,6 +22,18 @@ function App() {
         });
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        // Listen for new-message events
+        const handler = (message) => {
+            // If the message is for a chat other than the currently open one, show a toast
+            if (!selectedChat || message.chatId !== selectedChat._id) {
+                toast.info('New message in another chat!');
+            }
+        };
+        socket.on('new-message', handler);
+        return () => socket.off('new-message', handler);
+    }, [selectedChat]);
 
     return (
         <div className="app">
@@ -36,6 +52,8 @@ function App() {
                     </div>
                 )}
             </main>
+            <ToastContainer position="bottom-right" />
+            {/*<AutoMessageButton />*/}
         </div>
     );
 }

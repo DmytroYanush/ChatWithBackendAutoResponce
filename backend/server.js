@@ -4,12 +4,25 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const chatRoutes = require('./routes/chatRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const http = require('http');
+const { Server } = require('socket.io');
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
 app.use(cors());
 app.use(express.json());
+
+// Make io accessible in routes/controllers
+app.set('io', io);
 
 app.use('/api/chats', chatRoutes);
 app.use('/api/messages', messageRoutes);
@@ -21,6 +34,11 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true,
 })
   .then(() => {
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => console.error('❌ MongoDB connection error:', err));
+
+// Optional: basic connection log
+io.on('connection', (socket) => {
+  console.log('Socket.IO client connected:', socket.id);
+});
