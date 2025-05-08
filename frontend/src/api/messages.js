@@ -12,7 +12,7 @@ export async function sendMessage(chatId, text, user = null) {
   const res = await fetch(`${API_URL}/${chatId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, user }),
+    body: JSON.stringify({ text, sender: user }),
   });
 
   if (!res.ok) {
