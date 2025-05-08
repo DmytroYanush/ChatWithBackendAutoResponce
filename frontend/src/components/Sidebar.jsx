@@ -12,7 +12,7 @@ function Sidebar({ onSelect, user }) {
   const [editLastName, setEditLastName] = useState('');
   const [search, setSearch] = useState('');
   const [lastDates, setLastDates] = useState({});
-
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   useEffect(() => {
     const fetchChatsWithLastDates = async () => {
@@ -53,7 +53,6 @@ function Sidebar({ onSelect, user }) {
     }
   };
 
-
   const handleCreateChatFromSearch = async () => {
     if (!user) return alert('You must be logged in to create a chat.');
     if (!search.trim()) return;
@@ -76,8 +75,13 @@ function Sidebar({ onSelect, user }) {
 
   const handleDelete = async (id) => {
     if (!user) return;
-    await deleteChat(id);
-    setChats(prev => prev.filter(chat => chat._id !== id));
+    try {
+      await deleteChat(id);
+      setChats(prev => prev.filter(chat => chat._id !== id));
+      setDeleteConfirmId(null);
+    } catch (error) {
+      console.error('Failed to delete chat:', error);
+    }
   };
 
   const filteredChats = chats.filter(chat =>
@@ -161,7 +165,14 @@ function Sidebar({ onSelect, user }) {
                         setEditFirstName(chat.firstName);
                         setEditLastName(chat.lastName);
                       }}>✏️</button>
-                      <button onClick={() => handleDelete(chat._id)}>🗑️</button>
+                      {deleteConfirmId === chat._id ? (
+                        <div className="delete-confirmation">
+                          <button onClick={() => handleDelete(chat._id)} className="confirm-delete">✓</button>
+                          <button onClick={() => setDeleteConfirmId(null)} className="cancel-delete">✕</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => setDeleteConfirmId(chat._id)}>🗑️</button>
+                      )}
                     </div>
                   )}
                 </div>
