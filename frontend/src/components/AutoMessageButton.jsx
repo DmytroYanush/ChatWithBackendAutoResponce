@@ -16,7 +16,7 @@ const randomMessages = [
   "Hope everything is going well!"
 ];
 
-function AutoMessageButton({ compact }) {
+function AutoMessageButton({ compact, user }) {
   const [isActive, setIsActive] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
 
@@ -26,7 +26,7 @@ function AutoMessageButton({ compact }) {
       if (chats.length === 0) return;
       const randomChat = chats[Math.floor(Math.random() * chats.length)];
       const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-      await sendMessage(randomChat._id, randomMessage);
+      await sendMessage(randomChat._id, randomMessage, user?.uid || user?.email);
     } catch (error) {
       console.error('Error sending random message:', error);
     }
@@ -61,17 +61,17 @@ function AutoMessageButton({ compact }) {
               borderRadius: 16,
               fontSize: 12,
               position: 'static',
-              boxShadow: 'none',
+              // boxShadow: 'none',
             }
           : {
-              position: 'fixed',
-              bottom: 24,
-              right: 24,
-              zIndex: 1000,
+              // position: 'fixed',
+              // bottom: 24,
+              // right: 24,
+              // zIndex: 1000,
               padding: '12px 20px',
               borderRadius: 24,
               fontSize: 16,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              // boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
             }),
         background: isActive ? '#f44336' : '#4CAF50',
         color: 'white',

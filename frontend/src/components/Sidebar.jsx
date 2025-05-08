@@ -84,9 +84,12 @@ function Sidebar({ onSelect, user }) {
     }
   };
 
-  const filteredChats = chats.filter(chat =>
-    `${chat.firstName} ${chat.lastName}`.toLowerCase().includes(search.toLowerCase())
-  );
+  const isGuest = !user;
+  const filteredChats = chats
+    .filter(chat =>
+      `${chat.firstName} ${chat.lastName}`.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter(chat => !isGuest || chat.isPredefined);
 
   const chatExists = filteredChats.length > 0;
 
@@ -125,28 +128,30 @@ function Sidebar({ onSelect, user }) {
 
       <h4 className="sidebar-title">Chats</h4>
 
-      {!user ? (
-        <p style={{ padding: '10px', color: 'gray' }}>Log in to view and manage chats.</p>
-      ) : (
-        <ul className="chat-list">
-          {filteredChats.map((chat) => (
+      <ul className="chat-list">
+        {filteredChats.length === 0 ? (
+          <li style={{ padding: '10px', color: 'gray' }}>
+            {user ? 'No chats found.' : 'No public chats available.'}
+          </li>
+        ) : (
+          filteredChats.map((chat) => (
             <li key={chat._id} className="chat-item">
               {editingId === chat._id ? (
                 <div className="edit-mode">
-                  <label>
-                    <span className="edit-label">First Name</span>
+                  <div className="edit-field">
                     <input
                       value={editFirstName}
                       onChange={(e) => setEditFirstName(e.target.value)}
                     />
-                  </label>
-                  <label>
-                    <span className="edit-label">Last Name</span>
+                    <span className="edit-label">First Name</span>
+                  </div>
+                  <div className="edit-field">
                     <input
                       value={editLastName}
                       onChange={(e) => setEditLastName(e.target.value)}
                     />
-                  </label>
+                    <span className="edit-label">Last Name</span>
+                  </div>
                   <button onClick={() => handleUpdate(chat._id)}>💾</button>
                   <button onClick={() => setEditingId(null)}>❌</button>
                 </div>
@@ -178,9 +183,9 @@ function Sidebar({ onSelect, user }) {
                 </div>
               )}
             </li>
-          ))}
-        </ul>
-      )}
+          ))
+        )}
+      </ul>
     </div>
   );
 }

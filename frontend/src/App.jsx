@@ -7,17 +7,26 @@ import './styles/chat.css';
 import socket from './socket';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import AutoMessageButton from './components/AutoMessageButton';
 
 function App() {
     const [selectedChat, setSelectedChat] = useState(null);
     const [user, setUser] = useState(null);
+    const [guestId, setGuestId] = useState(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             if (!currentUser) {
                 setSelectedChat(null); // Clear chat on logout
+                // Генеруємо guestId, якщо його ще немає
+                let gid = localStorage.getItem('guestId');
+                if (!gid) {
+                    gid = 'guest-' + Math.random().toString(36).slice(2, 10);
+                    localStorage.setItem('guestId', gid);
+                }
+                setGuestId(gid);
+            } else {
+                setGuestId(null);
             }
         });
         return () => unsubscribe();
@@ -36,24 +45,23 @@ function App() {
     }, [selectedChat]);
 
     return (
-        <div className="app">
+        <div className="app" style={{ height: '100vh', overflow: 'hidden' }}>
             <Sidebar onSelect={setSelectedChat} user={user} />
             <main className="chat-window">
-                {user && selectedChat ? (
+                {(user || guestId) && selectedChat ? (
                     <>
                         <div className="chat-header">
                             {selectedChat.firstName} {selectedChat.lastName}
                         </div>
-                        <ChatWindow chatId={selectedChat._id} />
+                        <ChatWindow chatId={selectedChat._id} user={user || { uid: guestId }} />
                     </>
                 ) : (
                     <div className="chat-header">
-                        {user ? 'Select a chat to start messaging' : 'Please log in to use the chat'}
+                        {user || guestId ? 'Select a chat to start messaging' : 'Please log in to use the chat'}
                     </div>
                 )}
             </main>
             <ToastContainer position="bottom-right" />
-            {/*<AutoMessageButton />*/}
         </div>
     );
 }

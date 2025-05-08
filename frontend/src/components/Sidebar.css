@@ -1,5 +1,11 @@
 .sidebar-top {
     margin-bottom: 10px;
+    background-color: #f6fbfbc4;
+    padding: 10px;
+    border-bottom: 1px solid #a29797;
+    position: sticky;
+    top: 0;
+    z-index: 3;
 }
 
 .sidebar-login {
@@ -39,11 +45,19 @@
     margin: 12px 0 6px;
     color: #2196f3;
     font-weight: bold;
+    position: sticky;
+    top: 105px;
+    z-index: 2;
+    background: #fff;
+    padding-left: 18px;
 }
 
 .chat-list {
     list-style: none;
     padding: 0;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .chat-item {
@@ -94,23 +108,23 @@
     flex-direction: column;
 }
 
+.edit-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+}
+
 .edit-label {
-    font-size: 14px;
-    margin-bottom: 2px;
-    color: #333;
-    font-weight: 500;
+    font-size: 13px;
+    color: #555;
+    margin-top: 2px;
+    margin-left: 4px;
 }
 
 .edit-mode input {
     padding: 6px 8px;
     border-radius: 10px;
     border: 1px solid #ccc;
-}
-
-.sidebar-top {
-    background-color: #f5f5f5;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
 }
 
 .chat-meta {
@@ -122,10 +136,12 @@
 
 .sidebar {
     width: 280px;
-    /* розширено з ~220-240 */
-    padding: 10px;
+    padding: 0px;
     background-color: #fff;
-    border-right: 1px solid #ccc;
+    border-right: 1px solid #f6fbfbc4;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 .chat-info {

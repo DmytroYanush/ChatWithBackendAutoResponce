@@ -23,14 +23,17 @@ const getMessages = async (req, res) => {
 
 const sendMessage = async (req, res) => {
   const { chatId } = req.params;
-  const { text } = req.body;
+  const { text, sender } = req.body;
 
   if (!isValidObjectId(chatId)) {
     return res.status(400).json({ error: 'Invalid chatId' });
   }
+  if (!sender) {
+    return res.status(400).json({ error: 'Sender is required' });
+  }
 
   try {
-    const userMsg = new Message({ chatId, sender: 'user', text });
+    const userMsg = new Message({ chatId, sender, text });
     await userMsg.save();
 
     // Emit new-message event for user message
@@ -56,7 +59,39 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const updateMessage = async (req, res) => {
+  const { messageId } = req.params;
+  const { text, sender } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(messageId)) {
+    return res.status(400).json({ error: 'Invalid messageId' });
+  }
+  if (!sender) {
+    return res.status(400).json({ error: 'Sender is required' });
+  }
+  if (!text) {
+    return res.status(400).json({ error: 'Text is required' });
+  }
+
+  try {
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+    if (message.sender !== sender) {
+      return res.status(403).json({ error: 'You can only edit your own messages' });
+    }
+    message.text = text;
+    await message.save();
+    res.json(message);
+  } catch (err) {
+    console.error('updateMessage error:', err.message);
+    res.status(500).json({ error: 'Failed to update message' });
+  }
+};
+
 module.exports = {
   getMessages,
   sendMessage,
+  updateMessage,
 };
