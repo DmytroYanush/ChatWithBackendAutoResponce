@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/messages';
+const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api') + '/messages';
 
 export async function getMessages(chatId) {
   const res = await fetch(`${API_URL}/${chatId}`);
