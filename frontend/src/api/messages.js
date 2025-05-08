@@ -1,4 +1,4 @@
-const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api') + '/messages';
+const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000') + '/api/messages';
 
 export async function getMessages(chatId) {
   const res = await fetch(`${API_URL}/${chatId}`);
@@ -8,11 +8,11 @@ export async function getMessages(chatId) {
   return res.json();
 }
 
-export async function sendMessage(chatId, text, sender) {
+export async function sendMessage(chatId, text, user = null) {
   const res = await fetch(`${API_URL}/${chatId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, sender }),
+    body: JSON.stringify({ text, user }),
   });
 
   if (!res.ok) {
@@ -29,11 +29,11 @@ export async function updateMessage(messageId, text, sender) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text, sender }),
   });
+
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.message || 'Failed to update message');
   }
+
   return res.json();
 }
-
-
